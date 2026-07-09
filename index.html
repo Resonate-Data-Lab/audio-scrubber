@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Scrubber</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Audio Scrubber</h1>
+    </header>
+
+    <main>
+      <div id="input-controls" class="controls">
+        <button id="record-btn">Record</button>
+        <label id="upload-label">
+          Upload
+          <input id="file-input" type="file" accept="audio/*">
+        </label>
+      </div>
+
+      <div class="vis-row">
+        <span class="vis-label">Waveform</span>
+        <canvas id="waveform"></canvas>
+      </div>
+      <div class="vis-row">
+        <span class="vis-label">Spectrogram</span>
+        <canvas id="spectrogram"></canvas>
+      </div>
+      <div class="vis-row">
+        <span class="vis-label">Ring</span>
+        <canvas id="ring"></canvas>
+      </div>
+    </main>
+
+    <footer>
+      <div id="playback-controls" class="controls">
+        <button id="play-btn" disabled>Play</button>
+        <button id="stop-btn" disabled>Stop</button>
+        <span id="time-display">–.– / –.–</span>
+      </div>
+      <p id="status"></p>
+    </footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
