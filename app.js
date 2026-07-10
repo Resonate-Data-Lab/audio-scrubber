@@ -89,6 +89,7 @@ class AudioScrubber {
     this.fileInput   = document.getElementById('file-input');
     this.playBtn     = document.getElementById('play-btn');
     this.stopBtn     = document.getElementById('stop-btn');
+    this.downloadBtn = document.getElementById('download-btn');
     this.timeDisplay = document.getElementById('time-display');
     this.statusEl    = document.getElementById('status');
 
@@ -141,6 +142,7 @@ class AudioScrubber {
     this.fileInput.addEventListener('change', e => this.handleUpload(e));
     this.playBtn.addEventListener('click', () => this.togglePlay());
     this.stopBtn.addEventListener('click', () => this.stop());
+    this.downloadBtn.addEventListener('click', () => this.downloadAll());
 
     for (const el of [this.waveformEl, this.spectroEl, this.ringEl]) {
       el.addEventListener('mouseenter', e => this.startScrubbing(e));
@@ -217,8 +219,9 @@ class AudioScrubber {
       this.granular = new GranularScrubber(ac, this.buffer);
       this.stop();
       this.setTime(0);
-      this.playBtn.disabled = false;
-      this.stopBtn.disabled = false;
+      this.playBtn.disabled     = false;
+      this.stopBtn.disabled     = false;
+      this.downloadBtn.disabled = false;
       await this.renderAll();
     } catch (err) {
       this.setStatus('Error: ' + err.message);
@@ -513,9 +516,10 @@ class AudioScrubber {
     this.isPlaying = false;
     this.posOffset = 0;
     cancelAnimationFrame(this.rafId);
-    this.playBtn.textContent = 'Play';
-    this.playBtn.disabled    = !this.buffer;
-    this.stopBtn.disabled    = true;
+    this.playBtn.textContent  = 'Play';
+    this.playBtn.disabled     = !this.buffer;
+    this.stopBtn.disabled     = true;
+    this.downloadBtn.disabled = !this.buffer;
     if (this.buffer) { this.drawPlayhead(0); this.setTime(0); }
   }
 
@@ -623,6 +627,35 @@ class AudioScrubber {
     ctx.lineTo(cx + rMax * cosT, cy + rMax * sinT);
     ctx.stroke();
     ctx.restore();
+  }
+
+  // ── Download ───────────────────────────────────────────────────────────────
+
+  downloadAll() {
+    const canvases = [this.waveformEl, this.spectroEl, this.ringEl];
+
+    // Composite into one offscreen canvas (physical pixel dimensions)
+    const totalW = canvases[0].width;
+    const totalH = canvases.reduce((sum, c) => sum + c.height, 0);
+
+    const out = document.createElement('canvas');
+    out.width  = totalW;
+    out.height = totalH;
+    const ctx  = out.getContext('2d');
+
+    ctx.fillStyle = '#e8e8e8';
+    ctx.fillRect(0, 0, totalW, totalH);
+
+    let y = 0;
+    for (const canvas of canvases) {
+      ctx.drawImage(canvas, 0, y);
+      y += canvas.height;
+    }
+
+    const link = document.createElement('a');
+    link.download = 'audio-scrubber.png';
+    link.href = out.toDataURL('image/png');
+    link.click();
   }
 
   // ── UI helpers ─────────────────────────────────────────────────────────────
